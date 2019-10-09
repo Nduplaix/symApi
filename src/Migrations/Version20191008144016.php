@@ -35,7 +35,6 @@ final class Version20191008144016 extends AbstractMigration
         $this->addSql('ALTER TABLE image ADD CONSTRAINT FK_C53D045F4584665A FOREIGN KEY (product_id) REFERENCES product (id)');
         $this->addSql('ALTER TABLE reference ADD CONSTRAINT FK_AEA34913498DA827 FOREIGN KEY (size_id) REFERENCES size (id)');
         $this->addSql('ALTER TABLE reference ADD CONSTRAINT FK_AEA349134584665A FOREIGN KEY (product_id) REFERENCES product (id)');
-        $this->addSql('ALTER TABLE user CHANGE roles roles JSON NOT NULL');
     }
 
     public function down(Schema $schema) : void

@@ -2,7 +2,10 @@ App\Entity\Product:
   attributes:
     route_prefix: "/renarou"
   collectionOperations:
-    get: ~
+    get_products:
+      method: 'GET'
+      path: '/products'
+      controller: 'App\Controller\Getters\GetProducts'
     post:
       security: 'is_granted("ROLE_ADMIN")'
   itemOperations:

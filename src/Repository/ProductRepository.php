@@ -2,9 +2,15 @@
 
 namespace App\Repository;
 
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Paginator;
+use App\Entity\Category;
 use App\Entity\Product;
+use App\Entity\SubCategory;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query\QueryException;
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 
 /**
  * @method Product|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,9 +20,79 @@ use Doctrine\Common\Persistence\ManagerRegistry;
  */
 class ProductRepository extends ServiceEntityRepository
 {
+    const ITEMS_PER_PAGE = 20;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Product::class);
+    }
+
+    /**
+     * find all products for the sub-category in parameter
+     * @param SubCategory $subCategory
+     * @param int $page
+     * @return Paginator
+     * @throws QueryException
+     */
+    public function findProductsBySubCategory(SubCategory $subCategory, int $page)
+    {
+        $firstResult = ($page -1) * self::ITEMS_PER_PAGE;
+
+        $qb = $this->createQueryBuilder('product');
+
+        $query = $qb
+            ->where('product.subCategory = :subCat')
+            ->setParameter('subCat', $subCategory);
+
+        $criteria = Criteria::create()
+            ->setFirstResult($firstResult)
+            ->setMaxResults(self::ITEMS_PER_PAGE);
+
+        try {
+            $query->addCriteria($criteria);
+        } catch (QueryException $e) {
+            throw $e;
+        }
+
+        $doctrinePaginator = new DoctrinePaginator($query);
+        $paginator = new Paginator($doctrinePaginator);
+
+        return $paginator;
+    }
+
+    /**
+     * find all products for the category in parameter
+     * @param Category $category
+     * @param int $page
+     * @return Paginator
+     * @throws QueryException
+     */
+    public function findProductsByCategory(Category $category, int $page)
+    {
+
+        $firstResult = ($page -1) * self::ITEMS_PER_PAGE;
+
+        $qb = $this->createQueryBuilder('product');
+
+        $query = $qb
+            ->join('product.subCategory', 'subCategory')
+            ->where('subCategory.category = :category')
+            ->setParameter('category', $category);
+
+        $criteria = Criteria::create()
+            ->setFirstResult($firstResult)
+            ->setMaxResults(self::ITEMS_PER_PAGE);
+
+        try {
+            $query->addCriteria($criteria);
+        } catch (QueryException $e) {
+            throw $e;
+        }
+
+        $doctrinePaginator = new DoctrinePaginator($query);
+        $paginator = new Paginator($doctrinePaginator);
+
+        return $paginator;
     }
 
     // /**

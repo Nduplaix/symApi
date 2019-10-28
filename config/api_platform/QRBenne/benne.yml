@@ -1,0 +1,8 @@
+App\Entity\Benne:
+  attributes:
+    route_prefix: "/qrbenne"
+  collectionOperations:
+    get: ~
+  itemOperations:
+    get: ~
+    patch: ~

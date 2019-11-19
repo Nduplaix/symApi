@@ -7,6 +7,7 @@ use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource
@@ -21,21 +22,25 @@ class Category
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups("categories")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("categories")
      */
     private $label;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("categories")
      */
     private $slug;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\SubCategory", mappedBy="category", orphanRemoval=true)
+     * @Groups("categories")
      */
     private $subCategories;
 

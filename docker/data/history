@@ -1,0 +1,12 @@
+sf make:entity --api-resource
+sf mak:mi
+sf make:entity
+sf make:mi
+sf make:fixture
+composer req --dev fzaninotto/faker
+sf make:entity --api-resource
+sf make:mi
+sf make:entity
+sf make:mi
+sf make:Fixture
+php bin/console doctrine:fixtures:load

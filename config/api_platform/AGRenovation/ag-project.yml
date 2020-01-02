@@ -1,0 +1,14 @@
+App\Entity\AGProject:
+  attributes:
+    route_prefix: "/ag-renovation"
+    items_per_page: 4
+  collectionOperations:
+    get: ~
+    post:
+      security: 'is_granted("ROLE_ADMIN") and user.hasSite(3)'
+  itemOperations:
+    get: ~
+    patch:
+      security: 'is_granted("ROLE_ADMIN") and user.hasSite(3)'
+    delete:
+      security: 'is_granted("ROLE_ADMIN") and user.hasSite(3)'

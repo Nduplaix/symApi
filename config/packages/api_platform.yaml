@@ -1,4 +1,10 @@
 api_platform:
+    collection:
+        pagination:
+            enabled: true
+            items_per_page: 30
+            client_items_per_page: true
+            items_per_page_parameter_name: perPage
     mapping:
         paths:
             - '%kernel.project_dir%/src/Entity'

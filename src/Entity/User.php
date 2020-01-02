@@ -73,9 +73,15 @@ class User implements UserInterface
      */
     private $addresses;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Site", mappedBy="users")
+     */
+    private $sites;
+
     public function __construct()
     {
         $this->addresses = new ArrayCollection();
+        $this->sites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -275,5 +281,43 @@ class User implements UserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection|Site[]
+     */
+    public function getSites(): Collection
+    {
+        return $this->sites;
+    }
+
+    public function addSite(Site $site): self
+    {
+        if (!$this->sites->contains($site)) {
+            $this->sites[] = $site;
+            $site->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSite(Site $site): self
+    {
+        if ($this->sites->contains($site)) {
+            $this->sites->removeElement($site);
+            $site->removeUser($this);
+        }
+
+        return $this;
+    }
+
+    public function hasSite($id): bool
+    {
+        foreach ($this->sites as $site) {
+            if ($site->getId() === $id) {
+                return true;
+            }
+        }
+        return false;
     }
 }

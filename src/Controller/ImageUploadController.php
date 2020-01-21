@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,7 +19,7 @@ class ImageUploadController extends AbstractController
      * @Route("/api/imge-upload/{dir}", name="imagesUpload", methods={"POST"})
      * @param string $dir
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
+     * @return JsonResponse
      */
     public function uploadImage($dir, Request $request) {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -27,6 +28,8 @@ class ImageUploadController extends AbstractController
         if (!is_dir($directory)) {
             $fileSystem->mkdir($directory);
         }
+
+        $this->imagesDiff($directory, $request->request->all());
 
         $response = [];
 
@@ -81,6 +84,48 @@ class ImageUploadController extends AbstractController
 
         sort($response);
         return $this->json($response);
+    }
+
+    /**
+     * @param string $dir
+     * @param string[] $images
+     */
+    private function imagesDiff($dir, $images)
+    {
+        $savedImages = scandir($dir);
+
+        foreach ($savedImages as $savedImage)
+        {
+            if (!is_dir($savedImage))
+            {
+                $toRemove = true;
+
+                foreach ($images as $image)
+                {
+                    $file = explode('/', $image);
+                    $fileName = end($file);
+                    if ($fileName === $savedImage)
+                    {
+                        $toRemove = false;
+                        break;
+                    }
+                }
+
+                if ($toRemove)
+                {
+                    $this->deleteImages($dir.'/'.$savedImage);
+                }
+            }
+        }
+    }
+
+    private function deleteImages($path)
+    {
+        if (file_exists($path))
+        {
+            $fileSystem = new Filesystem();
+            $fileSystem->remove($path);
+        }
     }
 
     /**

@@ -15,12 +15,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class ImageUploadController extends AbstractController
 {
     /**
-     * @Route("/imge-upload/{dir}", name="imagesUpload", methods={"POST"})
+     * @Route("/api/imge-upload/{dir}", name="imagesUpload", methods={"POST"})
      * @param string $dir
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
      */
     public function uploadImage($dir, Request $request) {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $fileSystem = new Filesystem();
         $directory = $this->getParameter('kernel.project_dir'). '/public/images/'.$dir;
         if (!is_dir($directory)) {
@@ -28,6 +29,24 @@ class ImageUploadController extends AbstractController
         }
 
         $response = [];
+
+        foreach ($request->request->all() as $key => $image)
+        {
+            list($type, $index) = explode('-', $key);
+            if ($type === 'before')
+            {
+                $response[$index] = [
+                    "before" => $image,
+                    "after"  => ''
+                ];
+            } elseif ($type === 'after')
+            {
+                $response[$index]['after'] = $image;
+            } else {
+                $response[$index] = $image;
+            }
+        }
+
         foreach ($request->files as $key => $file){
             try {
                 $file->move(
@@ -39,19 +58,20 @@ class ImageUploadController extends AbstractController
                         "https" : "http") . "://" . $_SERVER['HTTP_HOST'] .
                         $this->generateUrl('getImages', ["dir" => $dir, "path" => $file->getClientOriginalName()]);
 
+                list($type, $index) = explode('-', $key);
+
                 if (preg_match('/(before)/', $key)) {
-                    $response[] = [
+                    $response[$index] = [
                         "before" => $url,
                         "after" => '',
                     ];
                 } elseif (preg_match('/(after)/', $key)) {
-                    $lastIndex = sizeof($response) - 1;
-                    $last = $response[$lastIndex];
+                    $last = $response[$index];
                     if (isset($last['before'])) {
-                        $response[$lastIndex]['after'] = $url;
+                        $response[$index]['after'] = $url;
                     }
                 } else {
-                    $response[] = $url;
+                    $response[$index] = $url;
                 }
             } catch (FileException $e) {
                 return $this->json($e->getMessage(), $e->getCode());
@@ -59,6 +79,7 @@ class ImageUploadController extends AbstractController
         }
         // Move the file to the directory where brochures are stored
 
+        sort($response);
         return $this->json($response);
     }
 

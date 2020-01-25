@@ -10,3 +10,4 @@ sf make:entity
 sf make:mi
 sf make:Fixture
 php bin/console doctrine:fixtures:load
+bin/console swift:email:send
